@@ -1,0 +1,49 @@
+component 0,output,flag,username,timestamp
+"'
+<!DOCTYPE html>
+<html lang=""en"">
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <title>Audio Recorder</title>
+</head>
+<body>
+    <button id=""recordButton"">Start Recording</button>
+    <button id=""stopButton"" disabled>Stop Recording</button>
+    <audio id=""audioPlayback"" controls></audio>
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        document.getElementById(""recordButton"").addEventListener(""click"", function() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunks.push(event.data);
+                    };
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        const audio = document.getElementById(""audioPlayback"");
+                        audio.src = audioUrl;
+                        audioChunks = [];
+                    };
+                    mediaRecorder.start();
+                    document.getElementById(""recordButton"").disabled = true;
+                    document.getElementById(""stopButton"").disabled = false;
+                })
+                .catch(e => console.error(e));
+        });
+
+        document.getElementById(""stopButton"").addEventListener(""click"", function() {
+            mediaRecorder.stop();
+            document.getElementById(""recordButton"").disabled = false;
+            document.getElementById(""stopButton"").disabled = true;
+        });
+    </script>
+</body>
+</html>
+",,,,2023-12-10 20:47:52.245626
+"{""path"":""flagged/Record Audio/e54efa64e060b9be74cd/audio.wav"",""url"":""http://127.0.0.1:7860/file=/tmp/gradio/3f5a5470b957944a3c96ffa92ddb27fb16d2493f/audio.wav"",""size"":806444,""orig_name"":""audio.wav"",""mime_type"":""""}", I'm testing to see whether or not this app can pick up a transcription of this recording.,,,2023-12-10 20:57:56.005369
+"{""path"":""flagged/Record Audio/0cc26150649dbd831d8b/audio.wav"",""url"":""http://127.0.0.1:7860/file=/tmp/gradio/1ac3aae63516a0126a547347f25447a6feb718d5/audio.wav"",""size"":794924,""orig_name"":""audio.wav"",""mime_type"":""""}", I'm testing to see whether or not this app can pick up a transcription of this recording.,,,2023-12-10 21:00:28.901791
