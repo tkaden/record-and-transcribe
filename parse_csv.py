@@ -1,30 +1,43 @@
-import os
 import pandas as pd
-from datetime import datetime
+import re
+import os
 
-# Define the paths
-flagged_csv_path = 'flagged/log.csv'
-transcripts_dir = 'transcripts/'
-output_dir = 'processed_flagged_data'
-os.makedirs(output_dir, exist_ok=True)
 
-# Read the CSV file
-df = pd.read_csv(flagged_csv_path)
+# Function to create a text file from a timestamp and corresponding output
+def create_text_file(timestamp, content, directory):
+    # Replace ':' and '.' with '_'
+    filename_timestamp = re.sub(r'[:.]', '_', timestamp)
+    # Define the file path with the proper name
+    file_path = os.path.join(directory, f'{filename_timestamp}.txt')
+    # Write the content to the file
+    with open(file_path, 'w') as file:
+        file.write(content)
+    print(file_path)
+    return file_path
 
-# Create a set of existing transcript filenames
-existing_transcripts = set(os.listdir(transcripts_dir))
+# Function to read the CSV and create text files
+def process_csv_and_create_files(csv_file_path, output_directory):
+    # Read the CSV file into a pandas DataFrame
+    df = pd.read_csv(csv_file_path)
 
-# Process each row in the CSV
-for index, row in df.iterrows():
-    timestamp = datetime.strptime(row['timestamp'], "%Y-%m-%d %H:%M:%S.%f")
-    transcript_filename = f'{timestamp.strftime("%Y%m%d_%H%M%S")}.txt'
-    transcript_filepath = os.path.join(transcripts_dir, transcript_filename)
+    # Loop through the DataFrame
+    for index, row in df.iterrows():
+        # Check if the 'output' column is not empty or NaN
+        if pd.notna(row['output']):
+            timestamp = row['timestamp']
+            output = row['output']
+            # Create a text file for each non-empty 'output'
+            create_text_file(timestamp, output, output_directory)
 
-    if transcript_filename not in existing_transcripts:
-        # If the transcript does not exist, create one
-        transcript_text = row['output']
-        with open(transcript_filepath, 'w') as file:
-            file.write(transcript_text)
-        print(f"Created transcript: {transcript_filename}")
-    else:
-        print(f"Transcript already exists: {transcript_filename}")
+# Example usage:
+# The paths are placeholders and should be replaced with actual paths where the log.csv file is located
+# and where the user wants to save the output text files.
+
+# Path to the CSV file
+csv_file_path = 'flagged/log.csv' # Replace with the actual path
+
+# Directory where text files will be saved
+output_directory = 'output' # Replace with the actual path
+
+# Call the function to process the CSV and create files
+process_csv_and_create_files(csv_file_path, output_directory)
